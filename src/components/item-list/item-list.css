@@ -1,0 +1,39 @@
+.container .ant-spin-spinning {
+  position: static;
+  display: grid;
+  opacity: 1;
+  justify-content: center;
+  justify-items: center;
+
+}
+
+.container .ant-alert-with-description .ant-alert-message {
+  align-items: center;
+  justify-content: center;
+  display: grid;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 16px;
+} 
+
+.container .ant-alert-with-description .ant-alert-description {
+  display: grid;
+  justify-content: center;
+} 
+
+.container .ant-alert-with-description.ant-alert-no-icon {
+
+  padding: 15px 15px;}
+
+.container{
+  font-family: 'Inter', 'sans-serif';
+}
+
+.container  img {
+  border-radius: 6px 0 0 6px;
+  vertical-align: middle;
+  border-style: none;
+}
+.container{
+  font-family: 'Inter', 'sans-serif';
+}

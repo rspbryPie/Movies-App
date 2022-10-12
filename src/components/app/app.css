@@ -1,0 +1,33 @@
+.ant-alert-with-description.ant-alert-no-icon {
+  display: grid;
+  padding: 15px 15px;
+  justify-content: center;
+  margin: 15px 26%;
+}
+
+.wrapper {
+  display: grid;
+  justify-items: center;
+}
+
+.ant-tabs-tabpane {
+  display: grid;
+  outline: none;
+  justify-items: center;
+  margin-bottom: 15px;
+}
+
+.ant-pagination, .ant-pagination ol, .ant-pagination ul {
+  margin: 0 0 15px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ant-input {
+  width: 90%;
+  margin-bottom: 15px;
+}
+
+.ant-input:placeholder-shown {
+  text-align: center;
+}
