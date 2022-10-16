@@ -31,3 +31,15 @@
 .ant-input:placeholder-shown {
   text-align: center;
 }
+
+.wrapper .description {
+  margin-bottom: 0;
+  height: 125px;
+  font-size: 12px;
+  line-height: 22px;
+  background-color: inherit;
+  padding: 7px 0 15px 0;
+}
+
+.ant-rate {
+  position: absolute;}

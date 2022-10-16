@@ -5,9 +5,16 @@ import { Spin, Alert } from 'antd';
 import 'antd/dist/antd.dark.min.css';
 import './item-list.css';
 
-const ItemList = ({ movies, loading, error, err }) => {
+const ItemList = ({ guestSessionId, genres, movies, loading, error, err }) => {
   const list = movies.map((item) => {
-    return <Item key={item.id} item={item} />;
+    return (
+      <Item
+        guestSessionId={guestSessionId}
+        genres={genres}
+        key={item.id}
+        item={item}
+      />
+    );
   });
 
   const hasData = !(loading || error);
@@ -18,7 +25,7 @@ const ItemList = ({ movies, loading, error, err }) => {
   const errorMessage = error ? (
     <Alert message={err.name} description={err.message} type='info' />
   ) : null;
-  console.log(list.length === 0);
+
   return (
     <div className='container'>
       {errorMessage}

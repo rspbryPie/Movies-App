@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { debounce } from 'lodash';
 import { Offline } from 'react-detect-offline';
 import MovieSevice from '../../services/get-resource';
+import { Context } from '../genres-context/genres-context';
 import { Alert, Pagination, Input, Tabs } from 'antd';
 import ItemList from '../item-list';
 
@@ -11,6 +12,10 @@ export default class App extends Component {
   movieService = new MovieSevice();
 
   state = {
+    ratedFilm: [],
+    guestSessionId: '',
+    genresList: [],
+    userRates: {},
     searchQuery: 'return',
     movieData: [],
     loading: true,
@@ -19,10 +24,24 @@ export default class App extends Component {
     currentPage: 1,
     totalPages: 1,
   };
-  constructor() {
-    super();
+
+  componentDidMount() {
+    if (!localStorage.getItem('guest_session_id')) {
+      this.startGuestSession();
+    } else {
+      this.setState({
+        guestSessionId: localStorage.getItem('guest_session_id'),
+      });
+    }
+    this.getGenres();
     this.updateMovies();
   }
+
+  componentDidCatch(error, info) {
+    // eslint-disable-next-line no-console
+    console.error(info.componentStack);
+  }
+
   onMovieLoaded = (movie, totalPages, page, query = 'return') => {
     this.setState({
       searchQuery: query,
@@ -33,6 +52,7 @@ export default class App extends Component {
       currentPage: page,
     });
   };
+
   onError = (err) => {
     this.setState({
       error: true,
@@ -40,6 +60,7 @@ export default class App extends Component {
       err: err,
     });
   };
+
   updateMovies = (page = 1, query = this.state.searchQuery) => {
     this.movieService
       .getAllMovies(page, query)
@@ -49,26 +70,54 @@ export default class App extends Component {
       .catch(this.onError);
   };
 
+  getGenres = () => {
+    this.movieService
+      .getGenres()
+      .then((res) => {
+        this.setState({ genresList: res.genres });
+      })
+      .catch(this.onError);
+  };
+
+  startGuestSession = () => {
+    this.movieService.saveGuestSessionId();
+  };
+
   async searchQueryChange(searchQuery) {
-    if (!searchQuery) return;
+    if (searchQuery === '') return;
     this.setState({ searchQuery: searchQuery });
     await this.updateMovies(1, searchQuery);
   }
+
   resSearchQueryChange = debounce(this.searchQueryChange, 1000);
-  componentDidMount() {
-    window.scrollTo(0, 0);
-  }
+
+  getRatedMovies = () => {
+    const { guestSessionId, currentPage } = this.state;
+    this.movieService
+      .getRatedMovies(guestSessionId, currentPage)
+      .then((item) => {
+        this.setState({
+          ratedFilm: item.results,
+        });
+      })
+      .catch(() => {
+        this.setState({
+          loading: false,
+          error: true,
+        });
+      });
+  };
+
   render() {
     const paginationChange = (page) => {
       this.updateMovies(page);
-      // this.componentDidMount();
       window.scrollTo(0, 0);
     };
-    console.log('пусто?', !(this.state.movieData.length === 0));
+
     const showTotal = (total) => `Total ${total} items`;
     const items = [
       {
-        label: 'Tab 1',
+        label: 'Search',
         key: 'item-1',
         children: (
           <React.Fragment>
@@ -86,29 +135,20 @@ export default class App extends Component {
               showSizeChanger={false}
               hideOnSinglePage={true}
             />
-            <ItemList
-              err={this.state.err}
-              error={this.state.error}
-              loading={this.state.loading}
-              movies={this.state.movieData}
-            />
-            {/* {!(this.state.movieData.length === 0) ? (
-              <ItemList
-                err={this.state.err}
-                error={this.state.error}
-                loading={this.state.loading}
-                movies={this.state.movieData}
-              />
-            ) : (
-              <>
-                <Spin tip='Loading...' />
-                <Alert
-                  message='Упссс'
-                  description='По вашему запросу ничего не найдено'
-                  type='info'
-                />
-              </>
-            )} */}
+            <Context.Consumer>
+              {(genresList) => {
+                return (
+                  <ItemList
+                    guestSessionId={this.state.guestSessionId}
+                    genres={genresList}
+                    err={this.state.err}
+                    error={this.state.error}
+                    loading={this.state.loading}
+                    movies={this.state.movieData}
+                  />
+                );
+              }}
+            </Context.Consumer>
 
             <Pagination
               current={this.state.currentPage}
@@ -122,11 +162,31 @@ export default class App extends Component {
             />
           </React.Fragment>
         ),
-      }, // remember to pass the key prop
-      { label: 'Tab 2', key: 'item-2', children: 'Content 2' },
+      },
+      {
+        label: 'Rated',
+        key: 'item-2',
+        children: (
+          <React.Fragment>
+            <Context.Consumer>
+              {(genresList) => {
+                return (
+                  <ItemList
+                    guestSessionId={this.state.guestSessionId}
+                    genres={genresList}
+                    err={this.state.err}
+                    error={this.state.error}
+                    loading={this.state.loading}
+                    movies={this.state.ratedFilm}
+                  />
+                );
+              }}
+            </Context.Consumer>
+          </React.Fragment>
+        ),
+      },
     ];
 
-    console.log(this.state.currentPage);
     return (
       <div className='wrapper'>
         <Offline>
@@ -136,12 +196,17 @@ export default class App extends Component {
             type='info'
           />
         </Offline>
-        <Tabs
-          style={{ width: '100%' }}
-          items={items}
-          centered={true}
-          destroyInactiveTabPane={true}
-        />
+        <Context.Provider value={this.state.genresList}>
+          <Tabs
+            style={{ width: '100%' }}
+            items={items}
+            centered={true}
+            destroyInactiveTabPane={true}
+            onChange={(e) => {
+              if (e === 'item-2') this.getRatedMovies();
+            }}
+          />
+        </Context.Provider>
       </div>
     );
   }
