@@ -38,6 +38,7 @@
     "jsx-a11y/control-has-associated-label":0,
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "prettier/prettier": "error",
+    "no-nested-ternary":"off",
     "linebreak-style": [0, "unix"],
     "quotes": ["error", "single"],
     "semi": ["error", "never"],

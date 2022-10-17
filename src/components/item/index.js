@@ -1,3 +1,3 @@
-import Item from './item';
+import Item from './item'
 
-export default Item;
+export default Item
